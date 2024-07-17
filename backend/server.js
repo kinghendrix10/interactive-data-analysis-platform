@@ -1,26 +1,28 @@
 // /backend/server.js
-const express = require('express');
-const cors = require('cors');
-const fileRoutes = require('./routes/fileRoutes');
-const queryRoutes = require('./routes/queryRoutes');
-const visualizationRoutes = require('./routes/visualizationRoutes');
-const codeRoutes = require('./routes/codeRoutes');
-const documentRoutes = require('./routes/documentRoutes');
-const executeRoutes = require('./routes/executeRoutes');
+const app = require('./app');
+const http = require('http');
+const WebSocket = require('ws');
 
-const app = express();
-const PORT = process.env.PORT || 5000;
+const port = process.env.PORT || 3000;
 
-app.use(cors());
-app.use(express.json());
+const server = http.createServer(app);
 
-app.use('/api', fileRoutes);
-app.use('/api', queryRoutes);
-app.use('/api', visualizationRoutes);
-app.use('/api', codeRoutes);
-app.use('/api', documentRoutes);
-app.use('/api', executeRoutes);
+// WebSocket setup
+const wss = new WebSocket.Server({ server });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+wss.on('connection', (ws) => {
+  console.log('New WebSocket connection');
+
+  ws.on('message', (message) => {
+    console.log('Received message:', message);
+    // Handle WebSocket messages here
+  });
+
+  ws.on('close', () => {
+    console.log('WebSocket connection closed');
+  });
+});
+
+server.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });
