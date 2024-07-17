@@ -1,8 +1,7 @@
 // /backend/routes/visualizationRoutes.js
 const express = require('express');
-const visualizationController = require('../controllers/visualizationController');
-
 const router = express.Router();
+const visualizationController = require('../controllers/visualizationController');
 
 router.get('/visualization', visualizationController.getVisualization);
 
