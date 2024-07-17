@@ -1,30 +1,31 @@
 // /backend/controllers/queryController.js
-const axios = require('axios');
+const { Configuration, OpenAIApi } = require('openai');
+
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+const openai = new OpenAIApi(configuration);
 
 exports.processQuery = async (req, res) => {
-  const { query } = req.body;
-
-  if (!query) {
-    return res.status(400).json({ error: 'Query is required' });
-  }
-
   try {
-    // TODO: Replace with actual API key and endpoint
-    const response = await axios.post('https://api.openai.com/v1/engines/davinci-codex/completions', {
-      prompt: `Convert the following natural language query to Python code:\n${query}\n\nPython code:`,
+    const { query } = req.body;
+
+    const completion = await openai.createCompletion({
+      model: "text-davinci-002",
+      prompt: `Convert the following natural language query to Python code:\n\n${query}\n\nPython code:`,
       max_tokens: 150,
-      temperature: 0.7,
-    }, {
-      headers: {
-        'Authorization': `Bearer YOUR_OPENAI_API_KEY`,
-        'Content-Type': 'application/json',
-      },
     });
 
-    const generatedCode = response.data.choices[0].text.trim();
-    res.status(200).json({ code: generatedCode });
+    const generatedCode = completion.data.choices[0].text.trim();
+
+    res.status(200).json({
+      message: 'Query processed successfully',
+      generatedCode: generatedCode
+    });
   } catch (error) {
-    console.error('Error processing query:', error);
-    res.status(500).json({ error: 'Error processing query' });
+    res.status(500).json({
+      error: 'Error processing query',
+      details: error.message
+    });
   }
 };
