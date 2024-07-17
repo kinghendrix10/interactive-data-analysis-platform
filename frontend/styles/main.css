@@ -1,0 +1,116 @@
+/* /frontend/styles/main.css */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #1a1a1a;
+  color: #ffffff;
+}
+
+.app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  color: #61dafb;
+}
+
+.navigation-tabs {
+  margin-top: 20px;
+}
+
+.tab-buttons {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 20px;
+}
+
+.tab-buttons button {
+  background-color: #282c34;
+  border: none;
+  color: #ffffff;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.tab-buttons button.active {
+  background-color: #61dafb;
+  color: #282c34;
+}
+
+.tab-content {
+  background-color: #282c34;
+  padding: 20px;
+  border-radius: 5px;
+}
+
+.file-upload {
+  margin-bottom: 20px;
+}
+
+.drop-zone {
+  border: 2px dashed #61dafb;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.chat-interface {
+  display: flex;
+  flex-direction: column;
+  height: 400px;
+}
+
+.chat-window {
+  flex-grow: 1;
+  overflow-y: auto;
+  margin-bottom: 10px;
+  padding: 10px;
+  background-color: #1a1a1a;
+  border-radius: 5px;
+}
+
+.message {
+  margin-bottom: 10px;
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+.message.user {
+  background-color: #61dafb;
+  color: #282c34;
+  align-self: flex-end;
+}
+
+.message.bot {
+  background-color: #282c34;
+  color: #ffffff;
+  align-self: flex-start;
+}
+
+.visualization {
+  margin-top: 20px;
+}
+
+.suggestions {
+  list-style-type: none;
+  padding: 0;
+  margin-top: 5px;
+}
+
+.suggestions li {
+  cursor: pointer;
+  padding: 5px 10px;
+  background-color: #282c34;
+  margin-bottom: 2px;
+}
+
+.suggestions li:hover {
+  background-color: #61dafb;
+  color: #282c34;
+}
