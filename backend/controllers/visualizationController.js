@@ -1,38 +1,22 @@
 // /backend/controllers/visualizationController.js
-const { spawn } = require('child_process');
+const { generateChart } = require('../utils/chartGenerator');
 
 exports.getVisualization = (req, res) => {
-  const { query } = req.query;
+  const { data, chartType } = req.query;
 
-  if (!query) {
-    return res.status(400).json({ error: 'Query is required' });
+  try {
+    const chartData = JSON.parse(data);
+    const chart = generateChart(chartData, chartType);
+
+    res.status(200).json({
+      message: 'Visualization generated successfully',
+      chart: chart
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Error generating visualization',
+      details: error.message
+    });
   }
-
-  const pythonProcess = spawn('python', ['./scripts/visualization.py', query]);
-
-  let result = '';
-  let error = '';
-
-  pythonProcess.stdout.on('data', (data) => {
-    result += data.toString();
-  });
-
-  pythonProcess.stderr.on('data', (data) => {
-    error += data.toString();
-  });
-
-  pythonProcess.on('close', (code) => {
-    if (code !== 0) {
-      console.error(`Visualization script exited with code ${code}`);
-      return res.status(500).json({ error: 'Error generating visualization' });
-    }
-
-    try {
-      const chartData = JSON.parse(result);
-      res.status(200).json(chartData);
-    } catch (err) {
-      console.error('Error parsing visualization data:', err);
-      res.status(500).json({ error: 'Error parsing visualization data' });
-    }
-  });
 };
+
