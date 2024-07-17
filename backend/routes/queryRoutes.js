@@ -1,8 +1,7 @@
 // /backend/routes/queryRoutes.js
 const express = require('express');
-const queryController = require('../controllers/queryController');
-
 const router = express.Router();
+const queryController = require('../controllers/queryController');
 
 router.post('/query', queryController.processQuery);
 
