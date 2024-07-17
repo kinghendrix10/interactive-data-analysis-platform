@@ -1,0 +1,17 @@
+{
+  "name": "interactive-data-analysis-platform",
+  "version": "1.0.0",
+  "description": "Full-stack Interactive Data Analysis Platform",
+  "scripts": {
+    "start": "cd backend && npm start",
+    "start:frontend": "cd frontend && cross-env NODE_OPTIONS=--openssl-legacy-provider npm start",
+    "start:backend": "cd backend && npm start",
+    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "build": "cd frontend && npm run build"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "cross-env": "^7.0.3"
+  }
+}
