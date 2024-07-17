@@ -1,36 +1,30 @@
 // /backend/controllers/fileUploadController.js
+// fileUploadController.js
 const xlsx = require('xlsx');
-const fs = require('fs');
+const path = require('path');
 
 exports.uploadFile = (req, res) => {
-  if (!req.file) {
+  if (!req.files || Object.keys(req.files).length === 0) {
     return res.status(400).json({ error: 'No file uploaded' });
   }
 
-  const filePath = req.file.path;
-  const fileExtension = req.file.originalname.split('.').pop().toLowerCase();
+  const file = req.files.file;
+  const uploadPath = path.join(__dirname, '../uploads', file.name);
 
-  try {
-    let data;
-    if (fileExtension === 'xlsx') {
-      const workbook = xlsx.readFile(filePath);
-      const sheetName = workbook.SheetNames[0];
-      data = xlsx.utils.sheet_to_json(workbook.Sheets[sheetName]);
-    } else if (fileExtension === 'csv') {
-      const fileContent = fs.readFileSync(filePath, 'utf8');
-      data = fileContent.split('\n').map(row => row.split(','));
-    } else {
-      throw new Error('Unsupported file format');
+  file.mv(uploadPath, (err) => {
+    if (err) {
+      return res.status(500).json({ error: 'File upload failed', details: err.message });
     }
 
-    // TODO: Save data to database or process it further
+    // Process the Excel file
+    const workbook = xlsx.readFile(uploadPath);
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const jsonData = xlsx.utils.sheet_to_json(sheet);
 
-    res.status(200).json({ message: 'File uploaded and processed successfully' });
-  } catch (error) {
-    console.error('Error processing file:', error);
-    res.status(500).json({ error: 'Error processing file' });
-  } finally {
-    // Clean up temporary file
-    fs.unlinkSync(filePath);
-  }
+    res.status(200).json({
+      message: 'File uploaded successfully',
+      data: jsonData
+    });
+  });
 };
