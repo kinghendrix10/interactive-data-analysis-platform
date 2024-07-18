@@ -1,25 +1,37 @@
-// /backend/controllers/documentController.js
+// backend/controllers/documentController.js
 const fs = require('fs').promises;
 const path = require('path');
 
 exports.listDocuments = async (req, res) => {
   try {
-    const uploadsDir = path.join(__dirname, '../uploads');
-    const files = await fs.readdir(uploadsDir);
-    
-    const documentList = files.map(file => ({
-      name: file,
-      path: path.join(uploadsDir, file)
+    const files = await fs.readdir('uploads/');
+    const fileDetails = await Promise.all(files.map(async (file) => {
+      const stats = await fs.stat(path.join('uploads/', file));
+      return {
+        name: file,
+        size: stats.size,
+        createdAt: stats.birthtime
+      };
     }));
-
-    res.status(200).json({
-      message: 'Documents listed successfully',
-      documents: documentList
-    });
+    res.json(fileDetails);
   } catch (error) {
-    res.status(500).json({
-      error: 'Error listing documents',
-      details: error.message
-    });
+    console.error('Error listing documents:', error);
+    res.status(500).json({ error: 'Error listing documents' });
+  }
+};
+
+exports.deleteDocument = async (req, res) => {
+  const { filename } = req.params;
+
+  if (!filename) {
+    return res.status(400).json({ error: 'Filename is required' });
+  }
+
+  try {
+    await fs.unlink(path.join('uploads/', filename));
+    res.json({ message: 'File deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting document:', error);
+    res.status(500).json({ error: 'Error deleting document' });
   }
 };
