@@ -1,8 +1,10 @@
-// /backend/routes/visualizationRoutes.js
+// backend/routes/visualizationRoutes.js
 const express = require('express');
 const router = express.Router();
 const visualizationController = require('../controllers/visualizationController');
+const { authenticate } = require('../middleware/auth');
 
-router.get('/visualization', visualizationController.getVisualization);
+// POST /api/visualization
+router.post('/', authenticate, visualizationController.generateVisualization);
 
 module.exports = router;
