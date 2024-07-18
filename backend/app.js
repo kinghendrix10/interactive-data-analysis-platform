@@ -1,41 +1,51 @@
-// /backend/app.js
+// backend/app.js
 const express = require('express');
 const cors = require('cors');
-const fileUpload = require('express-fileupload');
-const fileRoutes = require('./routes/fileRoutes');
-const queryRoutes = require('./routes/queryRoutes');
-const visualizationRoutes = require('./routes/visualizationRoutes');
-const codeRoutes = require('./routes/codeRoutes');
-const documentRoutes = require('./routes/documentRoutes');
-const executeRoutes = require('./routes/executeRoutes');
+const morgan = require('morgan');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
+const mongoose = require('mongoose');
+const routes = require('./routes');
+const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
-const express = require('express');
-const routes = require('./routes');
 
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useCreateIndex: true,
+  useFindAndModify: false
+}).then(() => {
+  console.log('Connected to MongoDB');
+}).catch((err) => {
+  console.error('Error connecting to MongoDB', err);
+  process.exit(1);
+});
 
-app.use('/api', routes);
 // Middleware
+app.use(helmet());
 app.use(cors());
+app.use(morgan('dev'));
 app.use(express.json());
-app.use(fileUpload());
+app.use(express.urlencoded({ extended: true }));
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100 // limit each IP to 100 requests per windowMs
+});
+app.use(limiter);
 
 // Routes
-app.use('/api', fileRoutes);
-app.use('/api', queryRoutes);
-app.use('/api', visualizationRoutes);
-app.use('/api', codeRoutes);
-app.use('/api', documentRoutes);
-app.use('/api', executeRoutes);
+app.use('/api', routes);
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    error: 'An unexpected error occurred',
-    message: err.message,
-    suggestion: 'Please try again or contact support if the problem persists.'
-  });
+// Error handling
+app.use(errorHandler);
+
+// 404 handler
+app.use((req, res, next) => {
+  res.status(404).json({ error: 'Not Found' });
 });
 
 module.exports = app;
