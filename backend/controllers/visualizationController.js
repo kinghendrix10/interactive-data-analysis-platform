@@ -1,22 +1,18 @@
-// /backend/controllers/visualizationController.js
-const { generateChart } = require('../utils/chartGenerator');
+// backend/controllers/visualizationController.js
+const { processDataForVisualization } = require('../utils/dataProcessing');
 
-exports.getVisualization = (req, res) => {
-  const { data, chartType } = req.query;
+exports.generateVisualization = async (req, res) => {
+  const { data, type } = req.body;
+
+  if (!data || !type) {
+    return res.status(400).json({ error: 'Data and visualization type are required' });
+  }
 
   try {
-    const chartData = JSON.parse(data);
-    const chart = generateChart(chartData, chartType);
-
-    res.status(200).json({
-      message: 'Visualization generated successfully',
-      chart: chart
-    });
+    const visualizationData = await processDataForVisualization(data, type);
+    res.json(visualizationData);
   } catch (error) {
-    res.status(500).json({
-      error: 'Error generating visualization',
-      details: error.message
-    });
+    console.error('Error generating visualization:', error);
+    res.status(500).json({ error: 'Error generating visualization' });
   }
 };
-
