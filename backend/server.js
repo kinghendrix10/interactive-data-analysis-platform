@@ -1,11 +1,17 @@
 // /backend/server.js
-const app = require('./app');
 const http = require('http');
 const WebSocket = require('ws');
 
 const port = process.env.PORT || 3000;
 
 const server = http.createServer(app);
+
+const express = require('express');
+const routes = require('./routes');
+
+const app = express();
+
+app.use('/api', routes);
 
 // WebSocket setup
 const wss = new WebSocket.Server({ server });
