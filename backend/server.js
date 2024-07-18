@@ -1,34 +1,29 @@
-// /backend/server.js
+// backend/server.js
+require('dotenv').config();
 const http = require('http');
-const WebSocket = require('ws');
+const app = require('./app');
 
 const port = process.env.PORT || 3000;
 
 const server = http.createServer(app);
 
-const express = require('express');
-const routes = require('./routes');
+server.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
 
-const app = express();
-
-app.use('/api', routes);
-
-// WebSocket setup
-const wss = new WebSocket.Server({ server });
-
-wss.on('connection', (ws) => {
-  console.log('New WebSocket connection');
-
-  ws.on('message', (message) => {
-    console.log('Received message:', message);
-    // Handle WebSocket messages here
-  });
-
-  ws.on('close', () => {
-    console.log('WebSocket connection closed');
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (err) => {
+  console.log('UNHANDLED REJECTION! 💥 Shutting down...');
+  console.error(err.name, err.message);
+  server.close(() => {
+    process.exit(1);
   });
 });
 
-server.listen(port, () => {
-  console.log(`Server running on port ${port}`);
+// Handle SIGTERM signal
+process.on('SIGTERM', () => {
+  console.log('👋 SIGTERM RECEIVED. Shutting down gracefully');
+  server.close(() => {
+    console.log('💥 Process terminated!');
+  });
 });
