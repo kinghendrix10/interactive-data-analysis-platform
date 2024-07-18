@@ -1,25 +1,63 @@
-# /scripts/dataProcessing.py
+# /project-root/scripts/dataProcessing.py
 import pandas as pd
-import sys
-import json
+import numpy as np
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
 
-def process_data(query):
-    # TODO: Replace this with actual data loading from your database or file system
-    df = pd.read_csv('path/to/your/data.csv')
+def load_data(file_path):
+    """Load data from a CSV or Excel file."""
+    if file_path.endswith('.csv'):
+        return pd.read_csv(file_path)
+    elif file_path.endswith(('.xls', '.xlsx')):
+        return pd.read_excel(file_path)
+    else:
+        raise ValueError("Unsupported file format. Please use CSV or Excel files.")
 
-    # Execute the query
-    result = df.query(query)
+def clean_data(df):
+    """Perform basic data cleaning operations."""
+    # Remove duplicate rows
+    df = df.drop_duplicates()
+    
+    # Handle missing values
+    df = df.fillna(df.mean())
+    
+    # Remove rows with any remaining NaN values
+    df = df.dropna()
+    
+    return df
 
-    # Convert the result to JSON
-    json_result = result.to_json(orient='records')
+def normalize_data(df):
+    """Normalize numerical columns using StandardScaler."""
+    scaler = StandardScaler()
+    numeric_columns = df.select_dtypes(include=[np.number]).columns
+    df[numeric_columns] = scaler.fit_transform(df[numeric_columns])
+    return df
 
-    return json_result
+def perform_pca(df, n_components=2):
+    """Perform Principal Component Analysis."""
+    pca = PCA(n_components=n_components)
+    numeric_columns = df.select_dtypes(include=[np.number]).columns
+    pca_result = pca.fit_transform(df[numeric_columns])
+    return pd.DataFrame(data=pca_result, columns=[f'PC{i+1}' for i in range(n_components)])
 
-if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print('Error: Query argument is missing')
-        sys.exit(1)
+def process_data(file_path):
+    """Main function to process data."""
+    df = load_data(file_path)
+    df = clean_data(df)
+    df = normalize_data(df)
+    pca_df = perform_pca(df)
+    
+    # Combine original data with PCA results
+    result_df = pd.concat([df, pca_df], axis=1)
+    
+    return result_df
 
-    query = sys.argv[1]
-    result = process_data(query)
-    print(result)
+if __name__ == "__main__":
+    # This block allows the script to be run standalone for testing
+    import sys
+    if len(sys.argv) > 1:
+        file_path = sys.argv[1]
+        result = process_data(file_path)
+        print(result.head())
+    else:
+        print("Please provide a file path as an argument.")
