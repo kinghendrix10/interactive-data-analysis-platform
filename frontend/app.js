@@ -1,137 +1,74 @@
-// WebSocket connection
-const socket = new WebSocket('ws://localhost:3000');
+// frontend/app.js
+import React, { useState } from 'react';
+import { createRoot } from 'react-dom/client';
+import NavigationTabs, { TabContent } from './components/NavigationTabs';
+import FileUpload from './components/FileUpload';
+import ChatInterface from './components/ChatInterface';
+import Visualization from './components/Visualization';
+import CodeEditor from './components/CodeEditor';
 
-socket.addEventListener('open', (event) => {
-    console.log('WebSocket connection established');
-});
+const App = () => {
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [currentVisualization, setCurrentVisualization] = useState(null);
+  const [currentCode, setCurrentCode] = useState('');
 
-socket.addEventListener('message', (event) => {
-    console.log('Message from server:', event.data);
-    // Handle incoming WebSocket messages
-});
+  const handleFileUploaded = (fileInfo) => {
+    setUploadedFiles((prevFiles) => [...prevFiles, fileInfo]);
+  };
 
-// File upload functionality
-const fileInput = document.getElementById('file-input');
-const uploadButton = document.getElementById('upload-file');
+  const handleVisualizationRequest = (visualizationData) => {
+    setCurrentVisualization(visualizationData);
+  };
 
-uploadButton.addEventListener('click', () => {
-    const file = fileInput.files[0];
-    if (file) {
-        const formData = new FormData();
-        formData.append('file', file);
+  const handleCodeRequest = (code) => {
+    setCurrentCode(code);
+  };
 
-        axios.post('/api/upload', formData)
-            .then(response => {
-                console.log('File uploaded successfully:', response.data);
-                updateDocumentList();
-            })
-            .catch(error => {
-                console.error('Error uploading file:', error);
-            });
-    }
-});
+  return (
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8">Interactive Data Analysis Platform</h1>
+      <NavigationTabs>
+        <TabContent value="overview">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div>
+              <h2 className="text-2xl font-semibold mb-4">Chat Interface</h2>
+              <ChatInterface
+                onVisualizationRequest={handleVisualizationRequest}
+                onCodeRequest={handleCodeRequest}
+              />
+            </div>
+            <div>
+              <h2 className="text-2xl font-semibold mb-4">Visualization</h2>
+              <Visualization data={currentVisualization} />
+            </div>
+          </div>
+        </TabContent>
+        <TabContent value="dashboards">
+          <h2 className="text-2xl font-semibold mb-4">Dashboards</h2>
+          {/* Add dashboard component here */}
+          <p>Dashboard functionality to be implemented.</p>
+        </TabContent>
+        <TabContent value="code">
+          <h2 className="text-2xl font-semibold mb-4">Code Editor</h2>
+          <CodeEditor initialCode={currentCode} />
+        </TabContent>
+        <TabContent value="documents">
+          <h2 className="text-2xl font-semibold mb-4">File Upload</h2>
+          <FileUpload onFileUploaded={handleFileUploaded} />
+          <div className="mt-8">
+            <h3 className="text-xl font-semibold mb-4">Uploaded Files</h3>
+            <ul className="list-disc pl-5">
+              {uploadedFiles.map((file, index) => (
+                <li key={index}>{file.name}</li>
+              ))}
+            </ul>
+          </div>
+        </TabContent>
+      </NavigationTabs>
+    </div>
+  );
+};
 
-// Query processing functionality
-const queryInput = document.getElementById('query-input');
-const sendQueryButton = document.getElementById('send-query');
-const chatWindow = document.getElementById('chat-window');
-
-sendQueryButton.addEventListener('click', () => {
-    const query = queryInput.value;
-    if (query) {
-        axios.post('/api/query', { query })
-            .then(response => {
-                console.log('Query processed:', response.data);
-                displayChatMessage('User', query);
-                displayChatMessage('Assistant', response.data.generatedCode);
-                updateCodeEditor(response.data.generatedCode);
-            })
-            .catch(error => {
-                console.error('Error processing query:', error);
-            });
-    }
-});
-
-function displayChatMessage(sender, message) {
-    const messageElement = document.createElement('div');
-    messageElement.innerHTML = `<strong>${sender}:</strong> ${message}`;
-    chatWindow.appendChild(messageElement);
-    chatWindow.scrollTop = chatWindow.scrollHeight;
-}
-
-// Visualization functionality
-const visualizationArea = document.getElementById('visualization-area');
-
-function updateVisualization(data, chartType) {
-    axios.get('/api/visualization', { params: { data: JSON.stringify(data), chartType } })
-        .then(response => {
-            console.log('Visualization generated:', response.data);
-            Plotly.newPlot(visualizationArea, response.data.chart);
-        })
-        .catch(error => {
-            console.error('Error generating visualization:', error);
-        });
-}
-
-// Code execution functionality
-const codeEditor = document.getElementById('code-editor');
-const executeCodeButton = document.getElementById('execute-code');
-
-executeCodeButton.addEventListener('click', () => {
-    const code = codeEditor.value;
-    if (code) {
-        axios.post('/api/execute', { code })
-            .then(response => {
-                console.log('Code executed:', response.data);
-                displayChatMessage('System', `Code execution result: ${response.data.output}`);
-            })
-            .catch(error => {
-                console.error('Error executing code:', error);
-            });
-    }
-});
-
-function updateCodeEditor(code) {
-    codeEditor.value = code;
-}
-
-// Document list functionality
-const documentList = document.getElementById('document-list');
-
-function updateDocumentList() {
-    axios.get('/api/documents')
-        .then(response => {
-            console.log('Documents retrieved:', response.data);
-            documentList.innerHTML = '';
-            response.data.documents.forEach(doc => {
-                const li = document.createElement('li');
-                li.textContent = doc.name;
-                documentList.appendChild(li);
-            });
-        })
-        .catch(error => {
-            console.error('Error retrieving documents:', error);
-        });
-}
-
-// Initial setup
-updateDocumentList();
-
-// Navigation functionality
-const navLinks = document.querySelectorAll('nav a');
-const sections = document.querySelectorAll('main section');
-
-navLinks.forEach(link => {
-    link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const targetId = link.getAttribute('href').slice(1);
-        sections.forEach(section => {
-            section.style.display = section.id === targetId ? 'block' : 'none';
-        });
-    });
-});
-
-// Show the overview section by default
-sections.forEach(section => {
-    section.style.display = section.id === 'overview' ? 'block' : 'none';
-});
+const container = document.getElementById('root');
+const root = createRoot(container);
+root.render(<App />);
