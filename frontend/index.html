@@ -1,51 +1,16 @@
+<!-- frontend/index.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark-theme">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Data Analysis Platform</title>
-    <link rel="stylesheet" href="styles/main.css">
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles/main.css">
 </head>
 <body>
-    <div id="app">
-        <nav>
-            <ul>
-                <li><a href="#overview">Overview</a></li>
-                <li><a href="#dashboards">Dashboards</a></li>
-                <li><a href="#code">Code</a></li>
-                <li><a href="#documents">Documents</a></li>
-            </ul>
-        </nav>
-        <main>
-            <section id="overview">
-                <h2>Overview</h2>
-                <div id="chat-window"></div>
-                <div id="chat-input">
-                    <input type="text" id="query-input" placeholder="Enter your query...">
-                    <button id="send-query">Send</button>
-                </div>
-            </section>
-            <section id="dashboards">
-                <h2>Dashboards</h2>
-                <div id="visualization-area"></div>
-            </section>
-            <section id="code">
-                <h2>Code</h2>
-                <div id="code-editor"></div>
-                <button id="execute-code">Execute</button>
-            </section>
-            <section id="documents">
-                <h2>Documents</h2>
-                <div id="file-upload">
-                    <input type="file" id="file-input" accept=".xlsx,.csv">
-                    <button id="upload-file">Upload</button>
-                </div>
-                <ul id="document-list"></ul>
-            </section>
-        </main>
-    </div>
-    <script src="app.js"></script>
+    <div id="root"></div>
+    <script type="module" src="/app.js"></script>
 </body>
 </html>
