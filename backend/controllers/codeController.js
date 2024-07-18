@@ -1,17 +1,18 @@
-// /backend/controllers/codeController.js
-exports.getCodeSnippet = (req, res) => {
-  // In a real application, you would fetch the latest code snippet from a database or cache
-  const latestCodeSnippet = `
-def analyze_data(data):
-    import pandas as pd
-    
-    df = pd.DataFrame(data)
-    summary = df.describe()
-    return summary.to_dict()
-  `;
+// backend/controllers/codeController.js
+const { generateCode } = require('../utils/codeGeneration');
 
-  res.status(200).json({
-    message: 'Code snippet retrieved successfully',
-    code: latestCodeSnippet
-  });
+exports.generateCode = async (req, res) => {
+  const { query } = req.body;
+
+  if (!query) {
+    return res.status(400).json({ error: 'Query is required' });
+  }
+
+  try {
+    const generatedCode = await generateCode(query);
+    res.json({ code: generatedCode });
+  } catch (error) {
+    console.error('Error generating code:', error);
+    res.status(500).json({ error: 'Error generating code' });
+  }
 };
