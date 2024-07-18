@@ -1,53 +1,76 @@
-# /scripts/visualization.py
-import pandas as pd
+# /project-root/scripts/visualization.py
 import matplotlib.pyplot as plt
-import sys
+import seaborn as sns
+import pandas as pd
 import json
-import io
-import base64
 
-def generate_visualization(query):
-    # TODO: Replace this with actual data loading from your database or file system
-    df = pd.read_csv('path/to/your/data.csv')
-
-    # Execute the query
-    result = df.query(query)
-
-    # Generate a simple bar chart
+def create_histogram(data, column, title):
+    """Create a histogram for a specified column."""
     plt.figure(figsize=(10, 6))
-    result.plot(kind='bar')
-    plt.title(f"Visualization for query: {query}")
-    plt.xlabel("X Axis")
-    plt.ylabel("Y Axis")
+    sns.histplot(data[column], kde=True)
+    plt.title(title)
+    plt.xlabel(column)
+    plt.ylabel('Frequency')
+    return plt
 
-    # Save the plot to a base64 encoded string
-    buffer = io.BytesIO()
-    plt.savefig(buffer, format='png')
-    buffer.seek(0)
-    image_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+def create_scatter_plot(data, x_column, y_column, title):
+    """Create a scatter plot for two specified columns."""
+    plt.figure(figsize=(10, 6))
+    sns.scatterplot(data=data, x=x_column, y=y_column)
+    plt.title(title)
+    plt.xlabel(x_column)
+    plt.ylabel(y_column)
+    return plt
 
-    # Create a Plotly-like data structure
-    chart_data = {
-        'data': [{
-            'x': result.index.tolist(),
-            'y': result.values.tolist(),
-            'type': 'bar'
-        }],
-        'layout': {
-            'title': f"Visualization for query: {query}",
-            'xaxis': {'title': 'X Axis'},
-            'yaxis': {'title': 'Y Axis'}
-        },
-        'image': f"data:image/png;base64,{image_base64}"
-    }
+def create_box_plot(data, column, title):
+    """Create a box plot for a specified column."""
+    plt.figure(figsize=(10, 6))
+    sns.boxplot(y=data[column])
+    plt.title(title)
+    plt.ylabel(column)
+    return plt
 
-    return json.dumps(chart_data)
+def create_correlation_heatmap(data, title):
+    """Create a correlation heatmap for numerical columns."""
+    numeric_columns = data.select_dtypes(include=['float64', 'int64']).columns
+    corr_matrix = data[numeric_columns].corr()
+    plt.figure(figsize=(12, 10))
+    sns.heatmap(corr_matrix, annot=True, cmap='coolwarm', linewidths=0.5)
+    plt.title(title)
+    return plt
 
-if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print('Error: Query argument is missing')
-        sys.exit(1)
+def generate_visualization(data, viz_type, params):
+    """Generate a visualization based on the specified type and parameters."""
+    if viz_type == 'histogram':
+        return create_histogram(data, params['column'], params['title'])
+    elif viz_type == 'scatter':
+        return create_scatter_plot(data, params['x_column'], params['y_column'], params['title'])
+    elif viz_type == 'box':
+        return create_box_plot(data, params['column'], params['title'])
+    elif viz_type == 'heatmap':
+        return create_correlation_heatmap(data, params['title'])
+    else:
+        raise ValueError(f"Unsupported visualization type: {viz_type}")
 
-    query = sys.argv[1]
-    result = generate_visualization(query)
-    print(result)
+def save_visualization(plt, output_path):
+    """Save the visualization to a file."""
+    plt.savefig(output_path)
+    plt.close()
+
+def main(data_path, viz_type, params, output_path):
+    """Main function to generate and save a visualization."""
+    data = pd.read_csv(data_path)
+    viz = generate_visualization(data, viz_type, params)
+    save_visualization(viz, output_path)
+    print(f"Visualization saved to {output_path}")
+
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) > 4:
+        data_path = sys.argv[1]
+        viz_type = sys.argv[2]
+        params = json.loads(sys.argv[3])
+        output_path = sys.argv[4]
+        main(data_path, viz_type, params, output_path)
+    else:
+        print("Usage: python visualization.py <data_path> <viz_type> <params_json> <output_path>")
