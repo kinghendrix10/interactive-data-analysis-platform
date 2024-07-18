@@ -10,7 +10,11 @@ const documentRoutes = require('./routes/documentRoutes');
 const executeRoutes = require('./routes/executeRoutes');
 
 const app = express();
+const express = require('express');
+const routes = require('./routes');
 
+
+app.use('/api', routes);
 // Middleware
 app.use(cors());
 app.use(express.json());
