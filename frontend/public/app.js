@@ -1,11 +1,12 @@
 // frontend/app.js
 import React, { useState } from 'react';
+import ReactDOM from 'react-dom';
 import { createRoot } from 'react-dom/client';
-import NavigationTabs, { TabContent } from './components/NavigationTabs';
-import FileUpload from './components/FileUpload';
-import ChatInterface from './components/ChatInterface';
-import Visualization from './components/Visualization';
-import CodeEditor from './components/CodeEditor';
+import NavigationTabs, { TabContent } from '../components/NavigationTabs';
+import FileUpload from '../components/FileUpload';
+import ChatInterface from '../components/ChatInterface';
+import Visualization from '../components/Visualization';
+import CodeEditor from '../components/CodeEditor';
 
 const App = () => {
   const [uploadedFiles, setUploadedFiles] = useState([]);

@@ -1,6 +1,7 @@
 {
     "name": "interactive-data-analysis-frontend",
     "version": "0.1.0",
+    "main": "frontend/public/app.js",
     "private": true,
     "dependencies": {
       "react": "^17.0.2",
@@ -9,6 +10,9 @@
       "axios": "^0.21.1",
       "react-plotly.js": "^2.5.1",
       "plotly.js": "^2.3.0"
+    },
+    "devDependencies": {
+      "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
     },
     "scripts": {
       "start": "react-scripts --openssl-legacy-provider start",
